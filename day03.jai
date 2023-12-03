@@ -38,11 +38,11 @@ parta :: (lines: []string) -> int {
 			if is_digit(char) {
 				if !in_number  {
 					// started new number
+					in_number = true;
 					current_number = 0;
 					counts = check(lines, x-1, y-1)
 						   | check(lines, x-1, y)
 						   | check(lines, x-1, y+1);
-					in_number = true;
 				}
 				counts |= check(lines, x, y-1)
 				        | check(lines, x, y+1);
@@ -65,13 +65,7 @@ parta :: (lines: []string) -> int {
 
 partb :: (lines: []string) -> int {
 	sum : int = 0;
-
 	maxX := lines[0].count - 1;
-
-	check :: (lines: []string, x: int, y: int) -> bool {
-		if x < 0 || x >= lines[0].count || y < 0 || y >= lines.count-1 return false;
-		return is_digit(lines[y][x]);
-	}
 
 	find_num :: (lines: []string, x: int, y: int) -> found: bool, nr: int {
 		if y < 0 || y > lines.count return false, 0;
@@ -80,11 +74,11 @@ partb :: (lines: []string) -> int {
 		if !is_digit(line[x]) return false, 0;
 
 		nr : int = 0;
-		while x >= 0 && is_digit(line[x]) x-=1;
-		x+=1;
+		while x >= 0 && is_digit(line[x]) x -= 1;
+		x += 1;
 		while x < line.count && is_digit(line[x]) {
 			nr = nr * 10 + char_to_int(line[x]);
-			x+=1;
+			x += 1;
 		}
 		return true, nr;
 	}
@@ -101,7 +95,6 @@ partb :: (lines: []string) -> int {
 
 				for dx: -1..1 {
 					for dy: -1..1 {
-						if dx == 0 && dy == 0 continue;
 						found, nr := find_num(lines, x+dx, y+dy);
 						if found {
 							if options[0] == nr || options[1] == nr continue;
