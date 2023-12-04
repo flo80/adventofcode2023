@@ -76,3 +76,14 @@ split_by_any :: (s: string, bytes: string, allocator := temp) -> (result: [] str
 
     return results;
 }
+
+eat_including_char :: (s: *string, char: u8) {
+	while s && (<<s)[0] != char advance(s, 1);
+	if s advance(s, 1);
+}
+
+sum_array :: (array: [$N]$T) -> T {
+	result : T;
+	for array result += it;
+	return result;
+}
