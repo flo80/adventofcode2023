@@ -41,7 +41,9 @@ check_scratchcard :: (card: string) -> count: int {
 }
 
 
-parta :: (lines: []string) -> int {
+parta :: (input: string) -> int {
+	lines := to_lines(input);
+
 	sum : int = 0;
 	for line: lines {
 		if !line continue;
@@ -54,7 +56,9 @@ parta :: (lines: []string) -> int {
 }
 
 
-partb :: (lines: []string) -> int {
+partb :: (input: string) -> int {
+	lines := to_lines(input);
+
 	copies : [300]int;
 
 	for line, i: lines {
@@ -68,6 +72,9 @@ partb :: (lines: []string) -> int {
 	return sum_array(copies);
 }
 
-main ::() {
-	execute(parta, partb, .{example, 13}, .{example, 30});
+main :: () {
+	execute(parta, partb, valid, day);
 }
+
+day :: #run get_day();
+valid :: #run test(parta, .[.{example, 13}], partb, .[.{example, 30}]);

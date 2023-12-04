@@ -4,47 +4,100 @@ File :: #import "File";
 String :: #import "String";
 HashTable :: #import "Hash_Table";
 
-Example :: struct {
+Example :: struct($R: Type) {
 	input: string;
-	expected: int;
+	expected: R;
 }
 
-execute :: (parta: ([]string) -> int, partb: ([]string) -> int, examples: .. Example) #expand  {
+to_lines :: (input: string) -> []string {
+	return String.split(input, "\n");
+}
+
+Correct :: enum {
+	UNKNOWN;
+	NO_TEST;
+	PASSED;
+	FAILED;
+}
+
+
+test :: (parta: (string) -> $RA, examplesA: []Example(RA), partb: (string) -> $RB, examplesB: []Example(RB)) -> Correct #expand  {
+    Debug.init();
+	correct: Correct = .UNKNOWN;
+	check := true;
+
+	ctx := context;
+	ctx.allocator = temp;
+	push_context ctx {
+		print("EXAMPLES\n");
+		for example, i: examplesA {
+			r := parta(example.input);
+			print("part a (%): % -- %\n", i+1, r, r == example.expected);
+			check &&= r == example.expected;
+		}
+		for example, i: examplesB {
+			r := partb(example.input);
+			print("part b (%): % -- %\n", i+1, r, r == example.expected);
+			check &&= r == example.expected;
+		}
+		if !examplesA || !examplesB {
+			log_error("no examples (for both parts) provided\n");
+			correct = .NO_TEST;
+		} else {
+			correct = ifx check then .PASSED else .FAILED;
+		}
+	}
+
+	if !check log_error("not all tests passed\n");
+	else log("all tests passed\n");
+	return correct;
+}
+
+get_day :: (loc := #caller_location) -> int {
+	f:= loc.fully_pathed_filename;
+	pos := String.find_index_from_left(f, "day");
+	if pos < 0 return 0;
+
+	dnr := String.slice(f, pos + 3, 2);
+	nr, ok := string_to_int(dnr);
+	return ifx ok then nr else 0;
+}
+
+execute :: (parta: (string) -> $RA, partb: (string) -> $RB, valid: Correct = .NO_TEST, day: int) #expand  {
     Debug.init();
 
-	args := get_command_line_arguments();
+	ctx := context;
+	ctx.allocator = temp;
+	push_context ctx {
+		args := get_command_line_arguments();
+		name: string;
 
-	if args.count > 1 {
-		name := args[1];
+		if args.count > 1 {
+			name = args[1];
+		} else if day > 0 {
+			name = tprint("day%.txt", formatInt(day, minimum_digits=2));
+		} else {
+			log_error("No input file provided\n");
+			exit(1);
+		}
+
 		file, ok := File.read_entire_file(name);
 		if !ok {
-			print("Could not read %\n", file);
+			log_error("Could not read %\n", file);
 			exit(1);
 		} else {
 			print("RESULTS FOR %\n", name);
 
-			lines := String.split(file, "\n");
+			a := parta(file);
+			print("- part a: % \n", a);
 
-			a := parta(lines);
-			print("part a: % \n", a);
+			b := partb(file);
+			print("- part b: % \n", b);
 
-			b := partb(lines);
-			print("part b: % \n", b);
+			print("Tests: %\n\n", valid);
 		}
-	} else {
-		print("EXAMPLES\n");
-		if examples.count == 0 {
-			print("no examples provided\n");
-			exit(1);
-		} else if examples.count == 1 {
-			a := parta(String.split(examples[0].input, "\n"));
-			print("part a: % -- %\n", a, a == examples[0].expected);
-		} else {
-			a := parta(String.split(examples[0].input, "\n"));
-			b := partb(String.split(examples[1].input, "\n"));
-			print("part a: % -- %\n", a, a == examples[0].expected);
-			print("part b: % -- %\n", b, b == examples[1].expected);
-		}
+		// log("Temporary_Storage used % bytes.\n", context.temporary_storage.total_bytes_occupied);
+		reset_temporary_storage();
 	}
 }
 

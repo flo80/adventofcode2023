@@ -14,7 +14,8 @@ example :: #string DONE
 DONE
 
 
-parta :: (lines: []string) -> int {
+parta :: (input: string) -> int {
+	lines := to_lines(input);
 	sum : int = 0;
 
 	maxX := lines[0].count - 1;
@@ -63,7 +64,9 @@ parta :: (lines: []string) -> int {
 }
 
 
-partb :: (lines: []string) -> int {
+partb :: (input: string) -> int {
+	lines := to_lines(input);
+
 	sum : int = 0;
 	maxX := lines[0].count - 1;
 
@@ -114,5 +117,8 @@ partb :: (lines: []string) -> int {
 }
 
 main ::() {
-	execute(parta, partb, .{example, 4361}, .{example, 467835});
+	execute(parta, partb, valid, day);
 }
+
+day :: #run get_day();
+valid :: #run test(parta, .[.{example, 4361}], partb, .[.{example, 467835}]);

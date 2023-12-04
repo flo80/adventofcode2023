@@ -18,7 +18,8 @@ zoneight234
 DONE
 
 
-parta :: (lines: []string) -> int {
+parta :: (input: string) -> int {
+	lines := to_lines(input);
 	sum : int = 0;
 	for lines {
 		first, last := 0, 0;
@@ -39,8 +40,9 @@ parta :: (lines: []string) -> int {
 	return sum;
 }
 
-partb :: (lines: []string) -> int {
+partb :: (input: string) -> int {
 	words :: string.["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+	lines := to_lines(input);
 	sum : int = 0;
 
 	for lines {
@@ -72,6 +74,9 @@ partb :: (lines: []string) -> int {
 	return sum;
 }
 
-main ::() {
-	execute(parta, partb, .{example1, 142}, .{example2, 281});
+main :: () {
+	execute(parta, partb, valid, day);
 }
+
+day :: #run get_day();
+valid :: #run test(parta, .[.{example1, 142}], partb, .[.{example2, 281}]);

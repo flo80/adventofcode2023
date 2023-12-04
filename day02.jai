@@ -9,7 +9,9 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 DONE
 
 
-parta :: (lines: []string) -> int {
+parta :: (input: string) -> int {
+	lines := to_lines(input);
+
 	maximums :: (c: string) -> int {
 		if c == {
 			case "red"; return 12;
@@ -41,7 +43,8 @@ parta :: (lines: []string) -> int {
 	return sum;
 }
 
-partb :: (lines: []string) -> int {
+partb :: (input: string) -> int {
+	lines := to_lines(input);
 	sum : int = 0;
 	for lines {
 		if !it continue;
@@ -71,6 +74,9 @@ partb :: (lines: []string) -> int {
 	return sum;
 }
 
-main ::() {
-	execute(parta, partb, .{example, 8}, .{example, 2286});
+main :: () {
+	execute(parta, partb, valid, day);
 }
+
+day :: #run get_day();
+valid :: #run test(parta, .[.{example, 8}], partb, .[.{example, 2286}]);
