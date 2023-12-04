@@ -82,8 +82,36 @@ eat_including_char :: (s: *string, char: u8) {
 	if s advance(s, 1);
 }
 
-sum_array :: (array: [$N]$T) -> T {
-	result : T;
+reduce :: inline (array: []$T, f: (acc: R, value: T) -> R, start: $R) -> R {
+	acc:R = start;
+	for array f(acc, it);
+	return acc;
+}
+
+reduce :: inline (array: []$T, f: (acc: R, value: T) -> $R) -> R {
+	acc:R;
+	for array acc = f(acc, it);
+	return acc;
+}
+
+sum_array :: (array: []$T) -> $R
+#modify {
+	R = T;
+	ti := cast(*Type_Info) T;
+	if ti.type == {
+		case .INTEGER;
+			R = int;
+			return true;
+
+		case .FLOAT;
+			return true;
+
+		case;
+			return false, "Needs a numeric array";
+	}
+}
+{
+	result : R;
 	for array result += it;
 	return result;
 }
