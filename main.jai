@@ -19,6 +19,7 @@ build :: () {
 		}
 
 		w := compiler_create_workspace();
+		if day == 5 set_optimization(*options, .VERY_OPTIMIZED, false);
         set_build_options(options, w);
 
 		log("Building day %", day);
