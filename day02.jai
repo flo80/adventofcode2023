@@ -74,9 +74,10 @@ partb :: (input: string) -> int {
 	return sum;
 }
 
+
+day :: #run get_day();
+valid :: #run test(parta, .[.{example, 8}], partb, .[.{example, 2286}], day);
+
 main :: () {
 	execute(parta, partb, valid, day);
 }
-
-day :: #run get_day();
-valid :: #run test(parta, .[.{example, 8}], partb, .[.{example, 2286}]);

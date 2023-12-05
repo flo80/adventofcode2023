@@ -72,9 +72,10 @@ partb :: (input: string) -> int {
 	return sum_array(copies);
 }
 
+
+day :: #run get_day();
+valid :: #run test(parta, .[.{example, 13}], partb, .[.{example, 30}], day);
+
 main :: () {
 	execute(parta, partb, valid, day);
 }
-
-day :: #run get_day();
-valid :: #run test(parta, .[.{example, 13}], partb, .[.{example, 30}]);

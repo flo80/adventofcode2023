@@ -21,7 +21,7 @@ Correct :: enum {
 }
 
 
-test :: (parta: (string) -> $RA, examplesA: []Example(RA), partb: (string) -> $RB, examplesB: []Example(RB)) -> Correct #expand  {
+test :: (parta: (string) -> $RA, examplesA: []Example(RA), partb: (string) -> $RB, examplesB: []Example(RB), day: int) -> Correct #expand  {
     Debug.init();
 	correct: Correct = .UNKNOWN;
 	check := true;
@@ -29,7 +29,7 @@ test :: (parta: (string) -> $RA, examplesA: []Example(RA), partb: (string) -> $R
 	ctx := context;
 	ctx.allocator = temp;
 	push_context ctx {
-		print("EXAMPLES\n");
+		print("EXAMPLES DAY %\n", day);
 		for example, i: examplesA {
 			r := parta(example.input);
 			print("part a (%): % -- %\n", i+1, r, r == example.expected);
@@ -48,8 +48,8 @@ test :: (parta: (string) -> $RA, examplesA: []Example(RA), partb: (string) -> $R
 		}
 	}
 
-	if !check log_error("not all tests passed\n");
-	else log("all tests passed\n");
+	if !check log_error("not all tests passed\n\n");
+	else log("all tests passed\n\n");
 	return correct;
 }
 
