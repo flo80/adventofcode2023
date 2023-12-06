@@ -33,6 +33,11 @@ parta :: (input: string) -> int {
 	for line, y: lines  {
 		if !line continue;
 
+		if counts sum += current_number;
+		counts = false;
+		in_number = false;
+		current_number = 0;
+
 		for x: 0..maxX {
 			char := line[x];
 
@@ -57,6 +62,7 @@ parta :: (input: string) -> int {
 
 				if counts sum += current_number;
 				in_number = false;
+				counts = false;
 			}
 		}
 	}
