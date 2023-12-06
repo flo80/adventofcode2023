@@ -37,14 +37,14 @@ humidity-to-location map:
 DONE
 
 Mapping :: struct {
-	destination: s64;
-	source: s64;
-	range: s64;
+	start: s64;
+	end: s64;
+	offset: s64;
 }
 
-SeedRange :: struct {
+Range :: struct {
 	start: s64;
-	length: s64;
+	end: s64;
 }
 
 parse_maps :: (lines: []string) -> [7][..]Mapping {
@@ -58,108 +58,93 @@ parse_maps :: (lines: []string) -> [7][..]Mapping {
 			i += 2;
 			continue;
 		}
-		dest := String.parse_int(*line, s64);
+		destination := String.parse_int(*line, s64);
 		source := String.parse_int(*line, s64);
 		range := String.parse_int(*line, s64);
 
-		array_add(*maps[current_map], .{dest, source, range});
+		array_add(*maps[current_map], .{start = source, end = source + range-1, offset = destination - source});
 		i += 1;
 	}
 	return maps;
 }
 
+process_mapping :: (previous : []Range, maps: []Mapping) -> []Range {
+	ranges : [..]Range;
+	next : [..]Range;
 
-parta :: (input: string) -> int {
-	get :: (map: []Mapping, source: s64) -> s64 {
-		dest: s64 = source;
-		for s: map {
-			if source >= s.source && source <= s.source + s.range {
-				offset := source - s.source;
-				dest = s.destination + offset;
-				break;
+	array_add(*ranges, ..previous);
+
+	while ranges {
+		range := pop(*ranges);
+		found := false;
+
+		for mapping: maps {
+			if range.start > mapping.end || range.end < mapping.start continue;
+			found = true;
+
+			new := array_add(*next);
+			new.start = max(range.start, mapping.start) + mapping.offset;
+			new.end = min(range.end, mapping.end) + mapping.offset;
+
+			if range.start < mapping.start {
+				before := array_add(*ranges);
+				before.start = range.start;
+				before.end = mapping.start - 1;
 			}
+
+			if range.end > mapping.end {
+				after := array_add(*ranges);
+				after.start = mapping.end + 1;
+				after.end = range.end;
+			}
+
+			break;
 		}
-		return dest;
+
+		if !found array_add(*next, range);
 	}
+	return next;
+}
 
-	get_chain :: (maps: [7][..]Mapping, source: s64) -> s64 {
-		dest := source;
-		for maps dest = get(it, dest);
-		return dest;
-	}
+find_lowest_location :: (seeds: []Range, maps: [][..]Mapping) -> s64 {
+	ranges : []Range = seeds;
+	for maps ranges = process_mapping(ranges, it);
 
-
-	lines := to_lines(input);
-
-	// seeds
-	seeds : [..]s64;
-	seed_line := lines[0];
-	eat_including_char(*seed_line, #char ":");
-	while seed_line {
-		nr : s64;
-		nr=, ok := String.parse_int(*seed_line, s64);
-		if !ok { log_error("parse error %", seed_line); exit(1); }
-		array_add(*seeds, nr);
-	}
-
-	maps:=parse_maps(lines);
-
-	minimum: s64 = -1;
-	for seed: seeds {
-		location: s64 = get_chain(maps, seed);
-		minimum = ifx minimum < 0 then location else min(location, minimum);
-	}
+	minimum := ranges[0].start;
+	for ranges minimum = min(minimum, it.start);
 
 	return minimum;
 }
 
+parta :: (input: string) -> int {
+	lines := to_lines(input);
+	seeds : [..]Range;
+
+	seed_line := lines[0];
+	eat_including_char(*seed_line, #char ":");
+	while seed_line {
+		start := String.parse_int(*seed_line, s64);
+		array_add(*seeds, .{start, start});
+	}
+
+	maps := parse_maps(lines);
+	return find_lowest_location(seeds, maps);
+}
 
 partb :: (input: string) -> int {
-	get_reverse :: (map: []Mapping, dest: s64) -> s64 {
-		source: s64 = dest;
-		for s: map {
-			if dest >= s.destination && dest <= s.destination + s.range {
-				offset := dest - s.destination;
-				source = s.source + offset;
-				break;
-			}
-		}
-		return source;
-	}
-
-	get_reverse_chain :: (maps: [7][..]Mapping, dest: s64) -> s64 {
-		source := dest;
-		for <maps source = get_reverse(it, source);
-		return source;
-	}
-
-
-	has_seed :: (seeds: []SeedRange, seed: s64) -> bool {
-		for s: seeds {
-			if seed >= s.start && seed < s.start + s.length return true;
-		}
-		return false;
-	}
-
 	lines := to_lines(input);
-	maps := parse_maps(lines);
+	seeds : [..]Range;
 
-
-	seeds : [..]SeedRange;
 	seed_line := lines[0];
 	eat_including_char(*seed_line, #char ":");
 	while seed_line {
 		start := String.parse_int(*seed_line, s64);
 		length := String.parse_int(*seed_line, s64);
-		array_add(*seeds, .{start, length});
+		array_add(*seeds, .{start, start + length - 1});
 	}
 
-	for location : 1..1_000_000_000 {
-		seed := get_reverse_chain(maps, location);
-		if has_seed(seeds, seed) return location;
-	}
-
-	return -1;
+	maps := parse_maps(lines);
+	return find_lowest_location(seeds, maps);
 }
 
 day :: #run get_day();
