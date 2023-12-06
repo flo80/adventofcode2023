@@ -3,6 +3,7 @@ Debug :: #import "Debug";
 File :: #import "File";
 String :: #import "String";
 HashTable :: #import "Hash_Table";
+Math :: #import "Math";
 
 Example :: struct($R: Type) {
 	input: string;
@@ -103,7 +104,7 @@ execute :: (parta: (string) -> $RA, partb: (string) -> $RB, valid: Correct = .NO
 
 // helper functions
 
-char_to_int:: (c: u8) -> u8, bool {
+char_to_int:: inline (c: u8) -> u8, bool {
 	if !is_digit(c) return 0, false;
 	return c - #char "0", true;
 }
