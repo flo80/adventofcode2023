@@ -6,12 +6,12 @@ Distance:  9  40  200
 DONE
 
 
-calc_options :: (t: float64, d: float64) -> int {
-	s := Math.sqrt(t * t - 4 * d);
-	m1: int = xx Math.floor((t + s) / 2 - 0.01);
-	m2: int = xx Math.ceil((t - s) / 2 + 0.01);
+calc_options :: (t: int, d: int) -> int {
+	s := Math.sqrt(cast(float64)(t * t - 4 * d));
+	m1: int = xx Math.floor((t - s) / 2 + 1);
+	m2: int = xx Math.ceil((t + s) / 2 - 1);
 
-	options := m1 - m2 + 1;
+	options := m2 - m1 + 1;
 	// print("% % => %\n", t, d, options);
 	return options;
 }
@@ -38,7 +38,7 @@ parta :: (input: string) -> int {
 	prod: int = 1;
 	for i: 0..times.count-1 {
 		if times[i] == 0 continue;
-		options := calc_options(xx times[i],  xx distances[i]);
+		options := calc_options(times[i],  distances[i]);
 		prod *= options;
 	}
 
@@ -57,7 +57,7 @@ partb :: (input: string) -> int {
 	}
 
 	lines := to_lines(input);
-	return calc_options(xx get_nr(lines[0]),xx get_nr(lines[1]));
+	return calc_options(get_nr(lines[0]),get_nr(lines[1]));
 }
 
 day :: #run get_day();
