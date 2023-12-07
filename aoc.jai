@@ -4,6 +4,7 @@ File :: #import "File";
 String :: #import "String";
 HashTable :: #import "Hash_Table";
 Math :: #import "Math";
+Sort :: #import "Sort";
 
 Example :: struct($R: Type) {
 	input: string;
