@@ -170,3 +170,35 @@ sum_array :: (array: []$T) -> $R
 	for array result += it;
 	return result;
 }
+
+
+gcd :: (a: $T, b: T) -> T
+#modify {
+	ti := cast(*Type_Info) T;
+	if ti.type == {
+		case .INTEGER;
+			return true;
+
+		case;
+			return false, "Needs integers";
+	}
+}
+{
+	if b == 0 return a;
+	return gcd(b, a%b);
+}
+
+lcm :: (arr : []$T) -> T
+#modify {
+	ti := cast(*Type_Info) T;
+	if ti.type == {
+		case .INTEGER;
+			return true;
+		case;
+			return false, "Needs an integer array";
+	}
+}{
+	ans := arr[0];
+	for i: 1..arr.count-1 ans = arr[i] / gcd(arr[i], ans) * ans;
+	return ans;
+}
