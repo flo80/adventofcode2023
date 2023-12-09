@@ -15,6 +15,17 @@ to_lines :: (input: string) -> []string {
 	return String.split(input, "\n");
 }
 
+parse_to_array :: (s: string) -> [..]int {
+	result : [..]int;
+	i:=0;
+	while s {
+		nr, ok := String.parse_int(*s);
+		assert(ok);
+		array_add(*result, nr);
+	}
+	return result;
+}
+
 Correct :: enum {
 	UNKNOWN;
 	NO_TEST;
