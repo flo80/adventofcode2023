@@ -72,10 +72,13 @@ Position :: struct {
 	x,y: s64;
 }
 
-operator == :: (a: Position, b: Position) -> bool {
+operator == :: inline (a: Position, b: Position) -> bool {
 	return a.x == b.x && a.y == b.y;
 }
 
+hash:: (a: Position) -> u32 { return xx (a.x << 16) | (a.y & 0xffff); }
+cmp:: (a: Position, b: Position) -> bool { return a == b; };
+PositionSet :: HashTable.Table(Position,u8, given_hash_function=hash, given_compare_function=cmp);
 
 /*
 	| is a vertical pipe connecting north and south.
@@ -137,7 +140,7 @@ follow_until :: (lines: []string, start: Position, current: Position) -> int, []
 }
 
 
-find_loop :: (input: string) -> int, []Position, []string, start:Position, start_char: u8 {
+find_loop :: (input: string) -> int, PositionSet, []string, start:Position, start_char: u8 {
 	lines := to_lines(input);
 
 	start : Position;
@@ -171,7 +174,7 @@ find_loop :: (input: string) -> int, []Position, []string, start:Position, start
 
 	start_char: u8;
 	cnt: int;
-	history: []Position;
+	history : []Position;
 
 	possible_N := possible(lines, start, N, possible_N_chars);
 	possible_S := possible(lines, start, S, possible_S_chars);
@@ -210,7 +213,11 @@ find_loop :: (input: string) -> int, []Position, []string, start:Position, start
 	}
 
 	assert(cnt > 0);
-	return cnt, history, lines, start, start_char;
+
+	ht: PositionSet;
+	for p: history HashTable.table_add(*ht,p,0);
+
+	return cnt, ht, lines, start, start_char;
 }
 
 parta :: (input: string) -> int {
@@ -222,9 +229,8 @@ partb :: (input: string) -> int {
 	cnt, loop, lines, start, start_char := find_loop(input);
 	lines[start.y][start.x] = start_char;
 
-	contains :: (pos: Position, loop: []Position) -> bool {
-		for p: loop if p == pos return true;
-		return false;
+	contains :: inline (pos: Position, loop: PositionSet) -> bool {
+		return HashTable.table_contains(*loop, pos);
 	}
 
 
@@ -274,7 +280,7 @@ partb :: (input: string) -> int {
 		}
 	}
 
-	print_loop :: (lines: []string, loop: []Position) {
+	print_loop :: (lines: []string, loop: PositionSet) {
 		print("\n");
 		for l, y: lines {
 			o := l;
