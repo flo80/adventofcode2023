@@ -213,3 +213,21 @@ lcm :: (arr : []$T) -> T
 	for i: 1..arr.count-1 ans = arr[i] / gcd(arr[i], ans) * ans;
 	return ans;
 }
+
+// Common data structures
+
+Position :: struct {
+	x,y: s64;
+}
+
+operator == :: inline (a: Position, b: Position) -> bool {
+	return a.x == b.x && a.y == b.y;
+}
+
+hash:: (a: Position) -> u32 { return xx (a.x << 16) | (a.y & 0xffff); }
+cmp:: (a: Position, b: Position) -> bool { return a == b; };
+PositionSet :: HashTable.Table(Position,u8, given_hash_function=hash, given_compare_function=cmp);
+
+manhattan_distance :: inline (pa: Position, pb: Position) -> int {
+	return Math.abs(pa.x-pb.x) + Math.abs(pa.y-pb.y);
+}
