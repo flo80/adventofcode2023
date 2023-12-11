@@ -62,9 +62,23 @@ partb :: (input: string) -> int {
 			}
 
 			if !ok continue;
+			if first == 0 {first = nr; break i;}
+		}
 
-			if first == 0 first = nr;
-			last = nr;
+		for <i: it.count-1..0 {
+			nr, ok := char_to_int(it[i]);
+			if !ok {
+				substr := String.slice(it, i, it.count - 1);
+				for w: 0..words.count-1 {
+					if String.starts_with(substr, words[w]) {
+						nr, ok = cast(u8) (w + 1), true;
+						break;
+					}
+				}
+			}
+
+			if !ok continue;
+			if last == 0 {last = nr; break i;}
 		}
 
 		sum += first * 10 + last;
