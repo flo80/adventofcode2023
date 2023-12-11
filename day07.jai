@@ -38,7 +38,7 @@ sort :: (hands: []Hand) {
 		for i: 0..4 if a.cards[i] != b.cards[i] return a.cards[i] - b.cards[i];
 		return 0;
 	}
-	Sort.bubble_sort(hands, sort_fct);
+	Sort.quick_sort(hands, sort_fct);
 }
 
 sum_bids :: (hands: []Hand) -> int {
