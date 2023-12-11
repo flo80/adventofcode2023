@@ -101,15 +101,23 @@ execute :: (parta: (string) -> $RA, partb: (string) -> $RB, valid: Correct = .NO
 		} else {
 			print("RESULTS FOR %\n", name);
 
+			start := current_time_monotonic();
 			a := parta(file);
-			print("- part a: % \n", a);
-
+			endA := current_time_monotonic() ;
 			b := partb(file);
-			print("- part b: % \n", b);
+			endB := current_time_monotonic() ;
 
-			print("Tests: %\n\n", valid);
+			print("- part a:  %\n", a);
+			print("- part b:  %\n", b);
+
+			print("---\nRuntime:   %ms (%ms, %ms)\n",
+				formatFloat(0.001 * to_microseconds(endB - start), trailing_width=3, zero_removal=.NO),
+				formatFloat(0.001 * to_microseconds(endA - start), trailing_width=3, zero_removal=.NO),
+				formatFloat(0.001 * to_microseconds(endB - endA), trailing_width=3, zero_removal=.NO)
+			);
+			print("Tests:     %\n", valid);
 		}
-		// log("Temporary_Storage used % bytes.\n", context.temporary_storage.total_bytes_occupied);
+		log("Allocated: % bytes.\n---\n\n", context.temporary_storage.total_bytes_occupied);
 		reset_temporary_storage();
 	}
 }
