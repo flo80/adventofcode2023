@@ -42,37 +42,19 @@ solve :: (input: string, increase: int = 1) -> int {
 	delta := ifx increase == 1 then 1 else increase-1;
 	galaxies, empty_lines, empty_rows := parse_input(input);
 
-	for <y: empty_lines {
-		for *p: galaxies {
-			if (<<p).y > y then (<<p).y += delta;
-		}
-	}
-
-	for <x: empty_rows {
-		for *p: galaxies {
-			if (<<p).x > x then (<<p).x += delta;
-		}
-	}
+	for <y: empty_lines for *p: galaxies if (<<p).y > y then (<<p).y += delta;
+	for <x: empty_rows  for *p: galaxies if (<<p).x > x then (<<p).x += delta;
 
 	sum := 0;
-	for a: 0..galaxies.count-1 {
-		for b: a..galaxies.count-1 {
-			sum += manhattan_distance(galaxies[a], galaxies[b]);
-		}
-	}
+	gc := galaxies.count-1;
+	for a: 0..gc for b: a+1..gc sum += manhattan_distance(galaxies[a], galaxies[b]);
 
 	return sum;
 }
 
-parta :: (input: string) -> int {
-	return solve(input);
-}
-
-partb :: (input: string) -> int {
-	return solve(input, 1000000);
-}
-
-solveB1 :: (input: string) -> int { return solve(input, 100); }
+parta   :: input => solve(input);
+partb   :: input => solve(input, 1000000);
+solveB1 :: input => solve(input, 100);
 
 day :: #run get_day();
 valid :: #run test(parta, .[.{example, 374}], solveB1, .[.{example, 8410}], day);
