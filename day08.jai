@@ -33,12 +33,20 @@ LR
 XXX = (XXX, XXX)
 DONE
 
-Node:: string;
+Node:: u32;
 Edges :: struct {
 	left, right: Node;
 }
 
 Network :: HashTable.Table(Node, Edges);
+
+// store only numeric to avoid string comparisons (slightly faster)
+to_node :: inline (str: string) -> Node {
+	assert(str.count >= 3);
+	return ((cast(Node)str[0]) << 16) |
+		   ((cast(Node)str[1]) << 8)  |
+		   ((cast(Node)str[2]) << 0)  ;
+}
 
 parse_input :: (input: string) -> instructions: string, graph: Network {
 	lines := to_lines(input);
@@ -50,9 +58,9 @@ parse_input :: (input: string) -> instructions: string, graph: Network {
 		line := lines[i];
 		if !line continue;
 
-		node := String.slice(line, 0, 3);
-		left := String.slice(line, 7, 3);
-		right := String.slice(line, 12, 3);
+		node  := to_node(String.slice(line, 0, 3));
+        left  := to_node(String.slice(line, 7, 3));
+        right := to_node(String.slice(line, 12, 3));
 
 		HashTable.table_add(*nodes, node, .{left, right});
 	}
@@ -68,21 +76,26 @@ step :: inline (current: Node, instruction: u8, map: Network) -> Node {
 		else return e.right;
 }
 
+current_loop_body :: #string DONE
+	{
+		i := instructions[idx];
+		steps += 1;
+		idx += 1;
+		if idx >= instructions.count idx = 0;
+		curr = step(curr, i, map);
+	}
+DONE
+
 parta :: (input: string) -> int {
-	start :: "AAA";
-	dest :: "ZZZ";
+	start := to_node("AAA");
+	dest  := to_node("ZZZ");
 
 	instructions, map := parse_input(input);
 
 	curr := start;
-
 	steps := 0;
-	while curr != dest {
-		i := instructions[steps % instructions.count];
-		steps += 1;
-		curr = step(curr, i, map);
-	}
-
+	idx := 0;
+	while curr != dest #insert current_loop_body;
 	return steps;
 }
 
@@ -94,14 +107,8 @@ partb :: (input: string) -> u64 {
 	count :: (start: Node, instructions: string, map: Network) -> u64 {
 		curr := start;
 		steps:u64 = 0;
-		icnt:u64 = xx instructions.count;
-
-		while curr[2] != last_letter {
-			i := instructions[steps % icnt];
-			steps += 1;
-			curr = step(curr, i, map);
-		}
-
+		idx := 0;
+		while curr & 0xff != last_letter #insert current_loop_body;
 		return steps;
 	}
 
@@ -111,7 +118,7 @@ partb :: (input: string) -> u64 {
 		#import "Hash_Table";
 
 		for e,n: map {
-			if n[2] != first_letter continue; // not A at end
+			if n & 0xff != first_letter continue; // not A at end
 			c := count(n, instructions, map);
 			array_add(*required_steps, c);
 		}
