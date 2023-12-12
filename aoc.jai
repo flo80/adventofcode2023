@@ -1,4 +1,5 @@
 #import "Basic";
+#import "Print_Color";
 Debug :: #import "Debug";
 File :: #import "File";
 String :: #import "String";
@@ -99,7 +100,8 @@ execute :: (parta: (string) -> $RA, partb: (string) -> $RB, valid: Correct = .NO
 			log_error("Could not read %\n", file);
 			exit(1);
 		} else {
-			print("RESULTS FOR %\n", name);
+			print_color("RESULTS FOR %\n", name, day, color=.HI_BLACK, style=.BOLD);
+			print_color("https://adventofcode.com/2023/day/%\n", name, day, color=.BLUE, style=.UNDERLINE);
 
 			start := current_time_monotonic();
 			a := parta(file);
@@ -115,7 +117,7 @@ execute :: (parta: (string) -> $RA, partb: (string) -> $RB, valid: Correct = .NO
 				formatFloat(0.001 * to_microseconds(endA - start), trailing_width=3, zero_removal=.NO),
 				formatFloat(0.001 * to_microseconds(endB - endA), trailing_width=3, zero_removal=.NO)
 			);
-			print("Tests:     %\n", valid);
+			print_color("Tests:     %\n", valid, color=ifx valid then .GREEN else .RED);
 		}
 		log("Allocated: % bytes.\n---\n\n", context.temporary_storage.total_bytes_occupied);
 		reset_temporary_storage();
