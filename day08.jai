@@ -51,7 +51,7 @@ to_node :: inline (str: string) -> Node {
 parse_input :: (input: string) -> instructions: string, graph: Network {
 	lines := to_lines(input);
 
-	instructions := lines[0];
+	instructions := String.trim(lines[0]);
 	nodes : Network;
 
 	for i:2..lines.count-1 {
