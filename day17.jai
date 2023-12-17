@@ -53,6 +53,15 @@ add :: (list: *[..]Step, new: Step) {
 }
 
 dirs :: Position.[.{-1,0},.{1,0},.{0,-1},.{0,1}];
+pos_to_dir :: inline (pos: Position) -> u8 {
+	if pos == .{-1,0} return 0;
+	if pos == .{1,0} return 1;
+	if pos == .{0,-1} return 2;
+	if pos == .{0,1} return 3;
+
+	assert(false, "Unknown pos %", pos);
+	return 4;
+}
 
 parta :: (input: string) -> int {
 	map := parse_input(input);
@@ -60,17 +69,18 @@ parta :: (input: string) -> int {
 	h := map.count-1;
 	dest:Position = .{w, h};
 
-	history : [200][200][..]Step;
+	history : [200][200][4][4]bool;
 
 	known :: (s: Step) -> bool #expand {
-		h := history[s.pos.y][s.pos.x];
-		for h if it == s return true;
-		return false;
+		if s.pos == .{0,0} return false;
+		d := pos_to_dir(s.dpos);
+		return history[s.pos.y][s.pos.x][s.steps][d];
 	}
 
 	add_history :: (s: Step) #expand {
-		h := *history[s.pos.y][s.pos.x];
-		array_add(h, s);
+		if s.pos == .{0,0} return;
+		d := pos_to_dir(s.dpos);
+		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
 	queue : [..]Step;
@@ -112,17 +122,18 @@ partb :: (input: string) -> int {
 	h := map.count-1;
 	dest:Position = .{w, h};
 
-	history : [200][200][..]Step;
+	history : [200][200][11][4]bool;
 
 	known :: (s: Step) -> bool #expand {
-		h := history[s.pos.y][s.pos.x];
-		for h if it == s return true;
-		return false;
+		if s.pos == .{0,0} return false;
+		d := pos_to_dir(s.dpos);
+		return history[s.pos.y][s.pos.x][s.steps][d];
 	}
 
 	add_history :: (s: Step) #expand {
-		h := *history[s.pos.y][s.pos.x];
-		array_add(h, s);
+		if s.pos == .{0,0} return;
+		d := pos_to_dir(s.dpos);
+		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
 	queue : [..]Step;
