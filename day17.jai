@@ -46,10 +46,60 @@ operator == :: (a: Step, b: Step) -> bool {
 	return a.pos == b.pos && a.dpos == b.dpos && a.steps == b.steps;
 }
 
-add :: (list: *[..]Step, new: Step) {
-	i:=0;
-	while i < list.count && new.loss < list.data[i].loss i+=1;
-	array_insert_at(list, new, i);
+
+Priority_Queue :: struct {
+	List_Entry :: struct {
+		value: Step;
+		next : *List_Entry = null;
+		prev : *List_Entry = null;
+	}
+
+	head:*List_Entry = null;
+	tail:*List_Entry = null;
+	count := 0;
+}
+
+add :: (list: *Priority_Queue, new: Step) {
+	entry := cast(*Priority_Queue.List_Entry)alloc(size_of(Priority_Queue.List_Entry));
+	entry.value = new;
+
+	if list.head == null {
+		list.head = entry;
+		list.tail = entry;
+	} else if(new.loss < list.tail.value.loss) {
+		list.tail.next = entry;
+		entry.prev = list.tail;
+		list.tail = entry;
+	} else {
+		c := list.head;
+		while c.next != null && new.loss < c.value.loss c = c.next;
+
+		entry.prev = c.prev;
+		entry.next = c;
+
+		if entry.prev == null list.head = entry;
+		else entry.prev.next = entry;
+
+		if entry.next == null list.tail = entry;
+		else entry.next.prev = entry;
+	}
+	list.count += 1;
+}
+
+pop :: (list: *Priority_Queue) -> Step {
+	assert(list.tail != null);
+	entry:= list.tail;
+	val := entry.value;
+	list.tail = entry.prev;
+
+	list.count -= 1;
+	if list.count == 0 {
+		list.head = null;
+		list.tail = null;
+	} else {
+		list.tail.next = null;
+	}
+	return val;
 }
 
 dirs :: Position.[.{-1,0},.{1,0},.{0,-1},.{0,1}];
@@ -83,10 +133,10 @@ parta :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : [..]Step;
+	queue : Priority_Queue;
 	add(*queue, .{0, .{0,0}, .{0,0}, 0});
 
-	while queue {
+	while queue.count {
 		cur := pop(*queue);
 		if known(cur) continue;
 		add_history(cur);
@@ -136,10 +186,10 @@ partb :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : [..]Step;
+	queue : Priority_Queue;
 	add(*queue, .{0, .{0,0}, .{0,0}, 0});
 
-	while queue {
+	while queue.count {
 		cur := pop(*queue);
 		if known(cur) continue;
 		add_history(cur);
