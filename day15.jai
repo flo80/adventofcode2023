@@ -57,7 +57,6 @@ partb :: (input: string) -> int {
 			else array_add(box, .{name, val});
 		}
 	}
-	print("%\n", boxes);
 
 	sum := 0;
 	for box, b:boxes for slot, s:box sum += (b+1) * (s+1) * cast(s64)(slot.val);
