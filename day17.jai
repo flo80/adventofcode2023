@@ -53,61 +53,6 @@ step_smaller :: (a: Step, b: Step) -> bool {
 	return a < b;
 }
 
-// heapq from https://github.com/python/cpython/blob/3.12/Lib/heapq.py
-
-heappush :: (heap: *[..]$T, item: T) {
-	array_add(heap, item);
-	_siftdown(heap, 0, heap.count - 1);
-}
-
-heappop :: (heap: *[..]$T) -> T {
-	last:T = pop(heap);
-
-	if heap.count {
-		returnitem:T = (<<heap)[0];
-		(<<heap)[0] = last;
-		_siftup(heap, 0);
-		return returnitem;
-	}
-
-	return last;
-}
-
-_siftdown :: (heap: *[..]$T, startpos: int, pos: int) {
-	newitem:T = (<<heap)[pos];
-
-	while pos > startpos {
-		parentpos := (pos - 1) >> 1;
-		parent:T = (<<heap)[parentpos];
-		if newitem < parent {
-			(<<heap)[pos] = parent;
-			pos = parentpos;
-			continue;
-		}
-		break;
-	}
-	(<<heap)[pos] = newitem;
-}
-
-_siftup :: (heap: *[..]$T, pos: int) {
-	endpos := heap.count;
-	startpos := pos;
-	newitem := (<<heap)[pos];
-
-	childpos := 2 * pos + 1;
-	while childpos < endpos {
-		rightpos := childpos + 1;
-		if rightpos < endpos && !((<<heap)[childpos] < (<<heap)[rightpos]) childpos = rightpos;
-		(<<heap)[pos] = (<<heap)[childpos];
-		pos = childpos;
-		childpos = 2 * pos + 1;
-	}
-	(<<heap)[pos] = newitem;
-	_siftdown(heap, startpos, pos);
-}
-
-
-
 dirs :: Position.[.{-1,0},.{1,0},.{0,-1},.{0,1}];
 pos_to_dir :: inline (pos: Position) -> u8 {
 	if pos == .{-1,0} return 0;
@@ -139,10 +84,10 @@ parta :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : [..]Step;
+	queue : HeapQueue(Step, step_smaller);
 	heappush(*queue, .{0, .{0,0}, .{0,0}, 0});
 
-	while queue {
+	while queue.data {
 		cur := heappop(*queue);
 		if known(cur) continue;
 		add_history(cur);
@@ -192,10 +137,10 @@ partb :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : [..]Step;
+	queue : HeapQueue(Step, step_smaller);
 	heappush(*queue, .{0, .{0,0}, .{0,0}, 0});
 
-	while queue.count {
+	while queue.data {
 		cur := heappop(*queue);
 		if known(cur) continue;
 		add_history(cur);

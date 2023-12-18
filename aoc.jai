@@ -245,3 +245,68 @@ PositionSet :: HashTable.Table(Position,u8, given_hash_function=hash, given_comp
 manhattan_distance :: inline (pa: Position, pb: Position) -> int {
 	return Math.abs(pa.x-pb.x) + Math.abs(pa.y-pb.y);
 }
+
+
+// heapq from https://github.com/python/cpython/blob/3.12/Lib/heapq.py
+HeapQueue :: struct(Value_Type: Type, given_lt_compare_function: (Value_Type, Value_Type) -> bool = null) {
+	data: [..]Value_Type;
+	#if given_lt_compare_function {
+        lt :: given_lt_compare_function;
+    } else {
+        lt :: (a: Value_Type, b: Value_Type) -> bool { return a < b; };
+    }
+}
+
+heappush :: (heap: *HeapQueue, item: heap.Value_Type) {
+	array_add(*(heap.data), item);
+	sift_down(heap, 0, heap.data.count - 1);
+}
+
+heappop :: (heap: *HeapQueue) -> heap.Value_Type {
+	last:heap.Value_Type = pop(*heap.data);
+
+	if heap.data.count {
+		returnitem:heap.Value_Type = heap.data[0];
+		heap.data[0] = last;
+		sift_up(heap, 0);
+		return returnitem;
+	}
+
+	return last;
+}
+
+#scope_file
+
+sift_down :: (heap: *HeapQueue, startpos: int, pos: int) {
+	newitem:heap.Value_Type = heap.data[pos];
+
+	while pos > startpos {
+		parentpos := (pos - 1) >> 1;
+		parent:heap.Value_Type = heap.data[parentpos];
+
+		if heap.lt(newitem, parent) {
+			heap.data[pos] = parent;
+			pos = parentpos;
+			continue;
+		}
+		break;
+	}
+	heap.data[pos] = newitem;
+}
+
+sift_up :: (heap: *HeapQueue, pos: int) {
+	endpos := heap.data.count;
+	startpos := pos;
+	newitem := heap.data[pos];
+
+	childpos := 2 * pos + 1;
+	while childpos < endpos {
+		rightpos := childpos + 1;
+		if rightpos < endpos && !heap.lt(heap.data[childpos], heap.data[rightpos]) childpos = rightpos;
+		heap.data[pos] = heap.data[childpos];
+		pos = childpos;
+		childpos = 2 * pos + 1;
+	}
+	heap.data[pos] = newitem;
+	sift_down(heap, startpos, pos);
+}
