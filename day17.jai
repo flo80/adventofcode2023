@@ -45,62 +45,68 @@ Step :: struct {
 operator == :: (a: Step, b: Step) -> bool {
 	return a.pos == b.pos && a.dpos == b.dpos && a.steps == b.steps;
 }
-
-
-Priority_Queue :: struct {
-	List_Entry :: struct {
-		value: Step;
-		next : *List_Entry = null;
-		prev : *List_Entry = null;
-	}
-
-	head:*List_Entry = null;
-	tail:*List_Entry = null;
-	count := 0;
+operator < :: (a: Step, b: Step) -> bool {
+	return a.loss < b.loss;
 }
 
-add :: (list: *Priority_Queue, new: Step) {
-	entry := cast(*Priority_Queue.List_Entry)alloc(size_of(Priority_Queue.List_Entry));
-	entry.value = new;
-
-	if list.head == null {
-		list.head = entry;
-		list.tail = entry;
-	} else if(new.loss < list.tail.value.loss) {
-		list.tail.next = entry;
-		entry.prev = list.tail;
-		list.tail = entry;
-	} else {
-		c := list.head;
-		while c.next != null && new.loss < c.value.loss c = c.next;
-
-		entry.prev = c.prev;
-		entry.next = c;
-
-		if entry.prev == null list.head = entry;
-		else entry.prev.next = entry;
-
-		if entry.next == null list.tail = entry;
-		else entry.next.prev = entry;
-	}
-	list.count += 1;
+step_smaller :: (a: Step, b: Step) -> bool {
+	return a < b;
 }
 
-pop :: (list: *Priority_Queue) -> Step {
-	assert(list.tail != null);
-	entry:= list.tail;
-	val := entry.value;
-	list.tail = entry.prev;
+// heapq from https://github.com/python/cpython/blob/3.12/Lib/heapq.py
 
-	list.count -= 1;
-	if list.count == 0 {
-		list.head = null;
-		list.tail = null;
-	} else {
-		list.tail.next = null;
-	}
-	return val;
+heappush :: (heap: *[..]$T, item: T) {
+	array_add(heap, item);
+	_siftdown(heap, 0, heap.count - 1);
 }
+
+heappop :: (heap: *[..]$T) -> T {
+	last:T = pop(heap);
+
+	if heap.count {
+		returnitem:T = (<<heap)[0];
+		(<<heap)[0] = last;
+		_siftup(heap, 0);
+		return returnitem;
+	}
+
+	return last;
+}
+
+_siftdown :: (heap: *[..]$T, startpos: int, pos: int) {
+	newitem:T = (<<heap)[pos];
+
+	while pos > startpos {
+		parentpos := (pos - 1) >> 1;
+		parent:T = (<<heap)[parentpos];
+		if newitem < parent {
+			(<<heap)[pos] = parent;
+			pos = parentpos;
+			continue;
+		}
+		break;
+	}
+	(<<heap)[pos] = newitem;
+}
+
+_siftup :: (heap: *[..]$T, pos: int) {
+	endpos := heap.count;
+	startpos := pos;
+	newitem := (<<heap)[pos];
+
+	childpos := 2 * pos + 1;
+	while childpos < endpos {
+		rightpos := childpos + 1;
+		if rightpos < endpos && !((<<heap)[childpos] < (<<heap)[rightpos]) childpos = rightpos;
+		(<<heap)[pos] = (<<heap)[childpos];
+		pos = childpos;
+		childpos = 2 * pos + 1;
+	}
+	(<<heap)[pos] = newitem;
+	_siftdown(heap, startpos, pos);
+}
+
+
 
 dirs :: Position.[.{-1,0},.{1,0},.{0,-1},.{0,1}];
 pos_to_dir :: inline (pos: Position) -> u8 {
@@ -133,11 +139,11 @@ parta :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : Priority_Queue;
-	add(*queue, .{0, .{0,0}, .{0,0}, 0});
+	queue : [..]Step;
+	heappush(*queue, .{0, .{0,0}, .{0,0}, 0});
 
-	while queue.count {
-		cur := pop(*queue);
+	while queue {
+		cur := heappop(*queue);
 		if known(cur) continue;
 		add_history(cur);
 
@@ -158,7 +164,7 @@ parta :: (input: string) -> int {
 			if npos.y < 0 || npos.y > h continue;
 
 			nloss := cur.loss + map[npos.y][npos.x];
-			add(*queue, .{nloss, npos, ndpos, steps});
+			heappush(*queue, .{nloss, npos, ndpos, steps});
 		}
 	}
 
@@ -186,11 +192,11 @@ partb :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : Priority_Queue;
-	add(*queue, .{0, .{0,0}, .{0,0}, 0});
+	queue : [..]Step;
+	heappush(*queue, .{0, .{0,0}, .{0,0}, 0});
 
 	while queue.count {
-		cur := pop(*queue);
+		cur := heappop(*queue);
 		if known(cur) continue;
 		add_history(cur);
 
@@ -213,7 +219,7 @@ partb :: (input: string) -> int {
 			if npos.y < 0 || npos.y > h continue;
 
 			nloss := cur.loss + map[npos.y][npos.x];
-			add(*queue, .{nloss, npos, ndpos, steps});
+			heappush(*queue, .{nloss, npos, ndpos, steps});
 		}
 	}
 
