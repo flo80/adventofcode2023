@@ -113,16 +113,12 @@ partb :: (input: string) -> u64 {
 	}
 
 	required_steps : [..]u64;
-	{
-		// workaround for broken for_expansion
-		#import "Hash_Table";
-
-		for e,n: map {
-			if n & 0xff != first_letter continue; // not A at end
-			c := count(n, instructions, map);
-			array_add(*required_steps, c);
-		}
+	for e,n: map {
+		if n & 0xff != first_letter continue; // not A at end
+		c := count(n, instructions, map);
+		array_add(*required_steps, c);
 	}
+
 	return lcm(required_steps);
 }
 

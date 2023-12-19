@@ -3,7 +3,7 @@
 Debug :: #import "Debug";
 File :: #import "File";
 String :: #import "String";
-HashTable :: #import "Hash_Table";
+using,only(for_expansion) HashTable :: #import "Hash_Table";
 Math :: #import "Math";
 Sort :: #import "Sort";
 
