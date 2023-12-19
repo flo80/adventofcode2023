@@ -239,8 +239,7 @@ operator + :: inline (a: Position, b: Position) -> Position {
 }
 
 hash:: (a: Position) -> u32 { return xx (a.x << 16) | (a.y & 0xffff); }
-cmp:: (a: Position, b: Position) -> bool { return a == b; };
-PositionSet :: HashTable.Table(Position,u8, given_hash_function=hash, given_compare_function=cmp);
+PositionSet :: HashTable.Table(Position,u8, given_hash_function=hash, given_compare_function=(a,b) => a == b);
 
 manhattan_distance :: inline (pa: Position, pb: Position) -> int {
 	return Math.abs(pa.x-pb.x) + Math.abs(pa.y-pb.y);

@@ -49,10 +49,6 @@ operator < :: (a: Step, b: Step) -> bool {
 	return a.loss < b.loss;
 }
 
-step_smaller :: (a: Step, b: Step) -> bool {
-	return a < b;
-}
-
 dirs :: Position.[.{-1,0},.{1,0},.{0,-1},.{0,1}];
 pos_to_dir :: inline (pos: Position) -> u8 {
 	if pos == .{-1,0} return 0;
@@ -84,7 +80,7 @@ parta :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : HeapQueue(Step, step_smaller);
+	queue : HeapQueue(Step, (a,b) => a<b);
 	heappush(*queue, .{0, .{0,0}, .{0,0}, 0});
 
 	while queue.data {
@@ -137,7 +133,7 @@ partb :: (input: string) -> int {
 		history[s.pos.y][s.pos.x][s.steps][d] = true;
 	}
 
-	queue : HeapQueue(Step, step_smaller);
+	queue : HeapQueue(Step, (a,b) => a<b);
 	heappush(*queue, .{0, .{0,0}, .{0,0}, 0});
 
 	while queue.data {
