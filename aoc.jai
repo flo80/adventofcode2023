@@ -13,7 +13,7 @@ Example :: struct($R: Type) {
 }
 
 to_lines :: (input: string) -> []string {
-	return String.split(input, "\n");
+	return String.split(String.trim(input), "\n");
 }
 
 parse_to_array :: (s: string) -> [..]int {
